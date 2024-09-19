@@ -13,5 +13,23 @@
         <div id="canvas-3d"></div>
     </div>
 
+    <script>
+                
+        window.onload = function() {
+            window.opener.callChild();
+        }
+
+        window.onresize = function() {
+            window.location.reload();
+        }
+
+                
+        window.addEventListener('keyup', (e)=>{
+            if (e.key === 'z') {
+                window.opener.toggleUI();
+            }
+        })
+    </script>
+
 </body>
 </html>

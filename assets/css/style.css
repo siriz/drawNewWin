@@ -1,0 +1,50 @@
+html, body {
+    background-color: #000;
+    width: 100%;
+    height: 100%;
+}
+
+#wrapper {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 100%;
+    overflow: hidden;
+}
+
+#ui-area {
+    display: grid;
+    background-color: #000;
+    grid-template-columns: 50% 50%;
+}
+#ui-area button {
+    width: 10em;
+    min-width: 100px;
+    margin: 10px auto;
+    background: #FC0;
+    background: linear-gradient(180deg, #333 0%, #555 49%, #111 50%, #222 100%);
+    box-shadow: 0 0 1px 0.2px rgba(255, 255, 255, 0.1) inset;
+    border-radius: 5px;
+    
+}
+
+.button-label {
+    color:#EEE;
+    font-family: NI02;
+    text-shadow: 0px 0px 10px 4px rgba(0,0,0,1);
+}
+
+#canvas-2d {
+    background-color: #FFF;
+    grid-template-rows: auto 60px;
+    display: grid;
+}
+
+
+
+canvas {
+    width: 100%;
+    height: 100%;
+    all: unset;
+    display: revert;
+}

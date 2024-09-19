@@ -78,7 +78,7 @@ $(document).ready(function () {
 
     function canvasResize() {
 
-        canvasWidth = window.innerWidth / 2;
+        canvasWidth = window.innerWidth;
         canvasHeight = window.innerHeight - $('#ui-area').height();
 
         ctx.canvas.width = canvasWidth;
@@ -121,8 +121,8 @@ $(document).ready(function () {
         }
         isClicked = false;
     });
-    
-    
+
+
     // Touch
     $canvas.on( 'touchstart', function( event ) {
         event.preventDefault();
@@ -315,6 +315,10 @@ $(document).ready(function () {
                 var px = pos.x - brushSizeCur / 2 + jitter;
                 var py = pos.y - brushSizeCur / 2 + jitter;
                 for (var i = 0, n = 10; i < n; i++) {
+                    // ctx.globalCompositeOperation = 'source-atop';
+                    // ctx.fillStyle = 'red';
+                    // ctx.fillRect(0,0,canvas.width, canvas.height);
+                    // ctx.globalCompositeOperation = 'multiply';
                     ctx.drawImage(ink, px, py, brushSizeCur, brushSizeCur);
                 }
             }

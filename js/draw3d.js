@@ -1,31 +1,37 @@
 import * as THREE from 'three';
 
 
-import Stats from 'three/addons/libs/stats.module.js';
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-// import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-
-// import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
-
-//
-
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
-// import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-// import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-// import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 
 
 
-// import { VignetteEffect, EffectComposer, EffectPass, RenderPass, DepthOfFieldEffect  } from "/js/libs/postprocessing/index.js";
+let durationTime = 30000;
+let range = document.getElementById('range');
 
+function updateSlide() {
+    let value = range.value;
+    document.getElementById('rangeValue').innerHTML = value + 'sec';
+    durationTime = parseInt(value * 1000);
+    window.localStorage.setItem('duration', value);
+}
 
+if ( window.localStorage && window.localStorage.getItem('duration') ) {
+    range.value = window.localStorage.getItem('duration');
+}
+updateSlide();
 
-var composer;
+range.addEventListener('change', updateSlide);
+range.addEventListener('mousemove', updateSlide);
 
+window.toggleUI = function() {
+    $('#ui').fadeToggle(100);
+}
+window.addEventListener('keyup', (e)=>{
+    if (e.key === 'z') {
+        window.toggleUI();
+    }
+})
 
 let canvasWidth = 0, canvasHeight = 0;
 
@@ -43,15 +49,30 @@ var meshGroup;
 
 var arr = [];
 
+window.preview = window.open('preview.html', 'preview', 'location=no, menubar=no,' + 'status=no,toolbar=no,titlebar=no');
 
-window.onload = function() {
 
+window.onbeforeunload = function() {
+    window.preview.close();
+}
+
+window.callChild = () => {
     init();
     animate();
 }
 
+
+
+var selfWin;
+
 function init() {
-    const container = document.getElementById('canvas-3d');
+
+
+    selfWin = window.preview;
+
+    // const container = document.getElementById('canvas-3d');
+    const container = selfWin.document.getElementById('canvas-3d');
+
 
 
     setCanvasSize();
@@ -63,7 +84,8 @@ function init() {
     scene.fog = new THREE.Fog( 0xe5e0d3, 50, 120 );
 
 
-    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+
+    camera = new THREE.PerspectiveCamera( 45, selfWin.innerWidth / selfWin.innerHeight, 1, 2000 );
     // camera.position.set( 0, 250, 300 );
     camera.position.set( 0, 0, 90 );
     
@@ -80,20 +102,18 @@ function init() {
         autoClear: false,
         // premultipliedAlpha: false,
     });
-    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setPixelRatio( selfWin.devicePixelRatio );
     renderer.setSize( canvasWidth, canvasHeight );
-    // renderer.autoClear = false;
-    // renderer.setClearColor( )
     
 
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 	renderer.setClearColor(0x000000, 0.0);
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-	renderer.shadowMap.autoUpdate = true;
-	renderer.shadowMap.needsUpdate = true;
-	renderer.shadowMap.enabled = true;
-	renderer.info.autoReset = false;
+	// renderer.shadowMap.autoUpdate = true;
+	// renderer.shadowMap.needsUpdate = true;
+	// renderer.shadowMap.enabled = true;
+	// renderer.info.autoReset = false;
 
     // renderer.toneMapping = THREE.ReinhardToneMapping;
 
@@ -102,76 +122,34 @@ function init() {
 
 
     
-    window.addEventListener( 'resize', onWindowResize );
+    selfWin.addEventListener( 'resize', onWindowResize );
     onWindowResize();
 
 
-    
-
-
-    // const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-    // dirLight.position.set( 0, 200, -50 );
-    // dirLight.castShadow = true;
-    // dirLight.shadow.camera.top = 180;
-    // dirLight.shadow.camera.bottom = - 100;
-    // dirLight.shadow.camera.left = - 120;
-    // dirLight.shadow.camera.right = 120;
-    // dirLight.shadow.radius = 8;
-    // dirLight.shadow.blurSamples = 12;
-    // scene.add( dirLight );
-
-    // const grid = new THREE.GridHelper( 3000, 100, 0xFF0000, 0xFFCC00 );
-    // grid.material.opacity = 0.2;
-    // grid.material.transparent = true;
-    // scene.add( grid );
-
-
-
-    // stats
-    stats = new Stats();
-    container.appendChild( stats.dom );
 
 
     controls = new OrbitControls( camera, renderer.domElement );
     controls.update();
 
 
-
-    composer = new EffectComposer(renderer);
-
-    renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
-
-    // Bokeh
-    bokehPass = new BokehPass(scene, camera, {
-        focus: 0,
-        aperture: 0.005,
-        maxblur: 0.01,
-        width: canvasWidth * 20,
-        height: canvasHeight * 20
-    });
-    bokehPass.renderToScreen = true;
-
-
-    renderer.autoClear = false;
-
     
 
     canvas2D = document.getElementById('canvas');
     new3DItem();
 
-    // makeMenu();
+    // const loader = new FBXLoader();
+    // loader.load('assets/SM_Ariya_noPlate.FBX', function(obj){
+    //     const mesh = obj.scene.children[0];
+    //     scene.add(mesh);
+    // })
+
 }
 
 
 
 
-var renderPass;
 var bokehPass;
 var canvas2D;
-var depthOfFieldEffect;
-var vignetteEffect;
-var cocMaterial;
 
 function new3DItem() {
 
@@ -209,6 +187,7 @@ function new3DItem() {
     
 
     mesh.position.set(0, 0, r)
+    meshGroup.material = material;
     meshGroup.add(mesh);
 
 }
@@ -229,20 +208,15 @@ function draw3DTexture(canvas) {
 
     material.map = texture;
 
-
-    // defaultCameraPosition.x = 0
-    // defaultCameraPosition.y = 0
-    // defaultCameraPosition.z = 100
     camera.position.lerp( defaultCameraPosition, 0.1 );
     camera.lookAt(0, 0, 0);
 
-
-    // renderer.render(scene, camera);
 }
 
 
 function exhibit3DItem() {
 
+    meshGroup.timeStamp = new Date() * 1;
     arr.push( meshGroup );
     meshGroup = null;
 
@@ -266,8 +240,8 @@ function onWindowResize() {
 
 
 function setCanvasSize() {
-    canvasWidth = window.innerWidth / 2;
-    canvasHeight = window.innerHeight;
+    canvasWidth = selfWin.innerWidth;
+    canvasHeight = selfWin.innerHeight;
 }
 
 
@@ -277,112 +251,30 @@ function animate() {
     requestAnimationFrame( animate );
 
     controls.update();
-    stats.update();
-    // renderer.render( scene, camera );
-
-    composer.render(0.1);
-
-
-    // if ( meshGroup && meshGroup.children.length > 0 ) {
-    //     for ( let i = 0, child = meshGroup.children; i < child.length; i ++ ) {
-    //         child[i]
-    //     }
-    // }
-    // if ( meshGroup.ready ) {
-    //     meshGroup.rotation.y += THREE.MathUtils.degToRad(0.01);
-    //     // rotate( meshGroup, meth.rotate.y + THREE.MathUtils.degToRad(0.1) )
-    // }
+    renderer.render( scene, camera );
 
     if ( arr.length > 0 ) {
 
+        let now = new Date() * 1;
+
         for ( let i = 0; i < arr.length; i ++ ) {
-            // arr[i].rotation.y += arr[i].spd;
-            arr[i].rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), arr[i].spd);
+            let letter = arr[i];
+            if ( letter.parent ) {
+                letter.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), letter.spd);
+
+                if ( now - letter.timeStamp > durationTime ) {
+                    gsap.to(letter.material, 0.5, {opacity: 0, onComplete: function(){
+                        scene.remove(letter);
+                        letter = undefined;
+                    }});
+                }
+            }
         }
-    }
-
-    if ( meshGroup ) {
-        // var v = new THREE.Vector3();
-        // camera.getWorldPosition(v);
-        // // v.add( new THREE.Vector3(0, 0, -100) );
-
-        // mesh.position.copy(v);
-        // mesh.translateZ( -100 );
-        // mesh.updateMatrix();
-        // mesh.position.lerp( v, 0.1 );
-        // meshGroup.updateMatrix();
-
-        // meshGroup.position.copy(camera.position)
-        // meshGroup.rotation.copy(camera.rotation)
-        // meshGroup.translateZ( -100 );
-        // meshGroup.updateMatrix();
-
-        // meshGroup.quaternion.copy(camera.quaternion);
-        // mesh.position.z = camera.position.z - 100;
-
-
-
 
     }
+
 
 }
 
 
 
-function rotate( object, deg, axis ) 
-{
-    // axis is a THREE.Vector3
-    var q = new THREE.Quaternion();
-    q.setFromAxisAngle(axis, THREE.MathUtils.degToRad( deg ) ); // we need to use radians
-    q.normalize();
-    object.quaternion.multiply( q );
-}
-
-
-
-
-function makeMenu() {
-    composer.addPass(bokehPass);
-
-    var menu = new dat.GUI({name: 'My GUI'});
-
-    const params = {
-        focus: 50,
-        aperture: 100,
-        maxblur: 0.1,
-    };
-
-
-    let folder = menu.addFolder("bokehPass");
-
-    
-
-    folder.add(params, "focus", 0.0, 3000.0, 1).onChange((value) => {
-
-        bokehPass.uniforms['focus'].value = params.focus;
-
-    });
-    folder.add(params, "aperture", 0.0, 100.0, 0.1).onChange((value) => {
-
-        bokehPass.uniforms['aperture'].value = params.aperture * 0.00001;
-
-    });
-    folder.add(params, "maxblur", 0.0, 3.0, 0.001).onChange((value) => {
-
-        bokehPass.uniforms['maxblur'].value = params.maxblur;
-
-    });
-
-    folder.open();
-   
-
-    if(window.innerWidth < 720) {
-
-        menu.close();
-
-    }
-
-    bokehPass.uniforms['focus'].value = params.focus;
-    bokehPass.uniforms['aperture'].value = params.aperture * 0.00001;
-    bokehPass.uniforms['maxblur'].value = params.maxblur;
-}
